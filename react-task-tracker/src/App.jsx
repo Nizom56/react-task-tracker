@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -27,6 +27,18 @@ function App() {
     setNewTask('');
   };
 
+  const toggleComplete = async (task) => {
+    const taskRef = doc(db, 'tasks', task.id);
+    await updateDoc(taskRef, {
+      completed: !task.completed
+    });
+  };
+
+  const handleDelete = async (id) => {
+    const taskRef = doc(db, 'tasks', id);
+    await deleteDoc(taskRef);
+  };
+
   return (
     <div style={{ width: '450px', background: '#2d2d30', padding: '30px', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)', margin: '50px auto' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '25px', color: '#fff', letterSpacing: '1px' }}>Task Tracker</h2>
@@ -50,13 +62,13 @@ function App() {
             <input
               type="checkbox"
               checked={task.completed}
-              readOnly
+              onChange={() => toggleComplete(task)}
               style={{ accentColor: '#8a2be2', width: '18px', height: '18px' }}
             />
             <span style={{ flex: 1, textDecoration: task.completed ? 'line-through' : 'none', color: task.completed ? '#777' : '#e0e0e0', fontSize: '16px' }}>
               {task.text}
             </span>
-            <button type="button" style={{ padding: '8px 12px', background: 'transparent', color: '#ff5252', border: '1px solid #ff5252', borderRadius: '6px', cursor: 'pointer' }}>
+            <button onClick={() => handleDelete(task.id)} type="button" style={{ padding: '8px 12px', background: 'transparent', color: '#ff5252', border: '1px solid #ff5252', borderRadius: '6px', cursor: 'pointer' }}>
               ✕
             </button>
           </li>
